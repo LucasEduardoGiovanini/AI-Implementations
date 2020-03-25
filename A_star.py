@@ -77,7 +77,7 @@ class hanoi():
         '''
         if self.move > self.first_movement[k]:
             value = self.move
-            while value > self.first_movement[k]:
+            while value > self.first_movement[k]: #regreção para descobrir de qual movimento eu partir e assim desobri se o valor atual de jogadas está na jogada do disco
                 value = value - self.plays[k]
             return 1 if value == self.first_movement[k] else 3
         return 1 if self.move == self.first_movement[k] else 3
@@ -140,12 +140,13 @@ class hanoi():
         set uma posição por um valor e seta o valor da posição antiga como 0
     '''
     def set_pos(self, line, col, _id, sum):
-        if self.get_max_col(col+sum) > _id or self.get_max_col(col+sum) == 0:
-                self.game[line][col] = 0
-                self.game[self.get_max_line(col+sum,_id)][col_id+sum] = _id
-                return True
-        return False
-
+        try:
+            if self.get_max_col(col+sum) > _id or self.get_max_col(col+sum) == 0:
+                    self.game[line][col] = 0
+                    self.game[self.get_max_line(col+sum,_id)][col_id+sum] = _id
+                    return True
+            return False
+        except: return False
 list_open = [] #armazena todas as jogadas possiveis
 list_lock = [] #armazena todas as jogodas passadas
 list_values = {1,2,3}
@@ -160,8 +161,8 @@ for i in range(5):
     
     if plays_of_disk%2 == 0:
         if _id%2 == 0 and  "left" in moviments:
-            if(game.set_pos(line_id,col_id,_id,-2) == False): game.set_pos(line_id,col_id,_id,-1)     
-        elif _id%2 != 0 and "rigth" in moviments or col_id == 0:
+            if(game.set_pos(line_id,col_id,_id,-1) == False): game.set_pos(line_id,col_id,_id,-2)     
+        elif _id%2 != 0 and "rigth" in moviments or col_id == 0:            
             if(game.set_pos(line_id,col_id,_id,2) == False): game.set_pos(line_id,col_id,_id,1)
             
     else:
@@ -169,6 +170,9 @@ for i in range(5):
            if(game.set_pos(line_id,col_id,_id,2) == False): game.set_pos(line_id,col_id,_id,1)
         elif _id%2 != 0 and "left" in moviments:
             if(game.set_pos(line_id,col_id,_id,-1) == False): game.set_pos(line_id,col_id,_id,-2)
+    print(game.plays_of_disk[_id], game.move)
+
     game.print_game()
+    
     game.move += 1
     game.plays_of_disk[_id] += 1
