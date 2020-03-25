@@ -1,4 +1,8 @@
 import sys
+import _util
+
+
+
 class hanoi():
     def __init__(self):
         self.first_movement = {1:1,2:2,3:4} #em qual jogada cada disco fara seu movimento, 2^(peso do disco - 1)
@@ -14,17 +18,20 @@ class hanoi():
         for i in self.game: #pega a coluna em que o k está
             if k in i:
                 col = i.index(k)
+        movements,maxCenter,maxLeft,maxRigth = [],0,0,0
         if col == 0 or col == 2: #verifica na duas estremidades o valor a ser retornado
-            maxCenter = 0
             for i in self.game:
                 if i[1] > maxCenter:
                     maxCenter = i[1]
+                if i[2] > maxRigth:
+                    maxRigth = i[2]
+                elif i[0] > maxLeft:
+                    maxLeft = i[0]
             if col == 0:
-                return ['rigth'] if maxCenter > k or maxCenter == 0 else []
+                return ['rigth'] if (maxCenter > k or maxCenter == 0) or (maxRigth > k or maxRigth == 0) else []
             else: 
-                return ['left'] if maxCenter > k or maxCenter == 0 else []
+                return ['left'] if (maxCenter > k or maxCenter == 0) or (maxLeft > k or maxLeft == 0) else []
         if col == 1: #verifica no pino central
-            movements,maxLeft, maxRigth = [],0,0
             for i in self.game:
                 if i[2] > maxRigth:
                     maxRigth = i[2]
@@ -89,7 +96,7 @@ class hanoi():
         _min = sys.maxsize
         _id = None
         for i in values:
-            heuristic = self.heuristic(i)            
+            heuristic = self.heuristic(i)   
             if  heuristic < _min:
                 _min = heuristic
                 _id =  i
@@ -99,7 +106,8 @@ class hanoi():
             Obs:
                 tem q ser recurção pois ele refaz a verificação
         '''
-        if self.game[self.get_line_by_id(_id)-1][self.get_col_by_id(_id)] != 0 and self.get_line_by_id(_id) != 0:
+        line,col = self.get_pos_by_id(_id)
+        if self.game[line-1][col] != 0 and line != 0:
             values.remove(_id)
             return self.verify_heristic(values)
         return [_id, _min]
@@ -111,22 +119,19 @@ class hanoi():
             _list.append(i[2])
         return verify == _list
 
-    def get_col_by_id(self,id): #pega a coluna pela chave
-        for i in self.game:
-            if id in i:
-                return i.index(id)
-        
-    def get_line_by_id(self,id): #pega a linha pela chave
+    def get_pos_by_id(self,id): #pega a posicao no matriz pela chave
         for i in range(len(self.game)):
             if id in self.game[i]:
-                return i
-    def get_max_col(self, col):#pega a coluna maxima
+                return [i, self.game[i].index(id)]
+
+    def get_max_in_col(self, col):#pega a coluna maxima
         _max = 0
         for i in self.game:
             if i[col] > _max:
                 _max = i[col]
         return _max
-    def get_max_line(self, col, value):#pega a linha maxima
+        
+    def get_max_in_line(self, col, value):#pega a linha maxima
         _max = 0
         for i in range(len(self.game)):
             if self.game[i][col] == 0 :
@@ -139,40 +144,63 @@ class hanoi():
     '''
         set uma posição por um valor e seta o valor da posição antiga como 0
     '''
+    def sum_col(self,col):
+        sum = 0
+        for i in self.game:
+            sum += i[col]
+        return sum
+    
+    def choice_side(self,moviments,col,_id):
+        if self.check_especial_case():
+            return 2
+        sum_cols = {}
+        for i in range(0, len(self.game[0])):
+            sum_cols[i] = game.sum_col(i)
+        col_possible = {}
+        if "rigth" in moviments:
+            for i in sum_cols:
+                if i > col and (self.get_max_in_col(i) > _id or self.get_max_in_col(i) == 0):
+                    col_possible[i] = sum_cols[i]
+        if "left" in moviments:
+            for i in sum_cols:
+                if i < col and (self.get_max_in_col(i) > _id or self.get_max_in_col(i) == 0):
+                    col_possible[i] = sum_cols[i]
+        
+        if _util.dic_iqual(col_possible) == True: 
+            _list = _util.dic_key(col_possible)
+            return int(_list[len(_list)-1]) #retorna a primeira chave
+        return _util.dic_minValue(col_possible)[0] #retorna a chave com maior valor
+    def check_especial_case(self):
+        if self.game[2][2] == 3 and self.game[1][2] == 2:
+            return True
+        return False
+    def set_pos(self,line,col,_id,next_col):
+        
+        self.game[line][col] = 0
+        self.game[self.get_max_in_line(next_col,_id)][next_col] = _id
+    '''
     def set_pos(self, line, col, _id, sum):
         try:
-            if self.get_max_col(col+sum) > _id or self.get_max_col(col+sum) == 0:
+            if self.get_max_in_col(col+sum) > _id or self.get_max_in_col(col+sum) == 0:
                     self.game[line][col] = 0
-                    self.game[self.get_max_line(col+sum,_id)][col_id+sum] = _id
+                    self.game[self.get_max_in_line(col+sum,_id)][col_id+sum] = _id
                     return True
             return False
         except: return False
+    '''
 list_open = [] #armazena todas as jogadas possiveis
 list_lock = [] #armazena todas as jogodas passadas
 list_values = {1,2,3}
 game = hanoi() #instacia a torre
-#while game.complet() == False: #roda até que o objetivo tenha sido atigindo
-for i in range(5):
+while game.complet() == False: #roda até que o objetivo tenha sido atigindo
+#for i in range(8):
+    list_values = {1,2,3}
     _id,_value = game.verify_heristic(list_values) #pega a chave escolhido pela heuristica
-    col_id = game.get_col_by_id(_id) #pega a coluna da chave
-    line_id = game.get_line_by_id(_id)# pega a linha da coluna
+    line_id,col_id = game.get_pos_by_id(_id) #pega a posição no game pelo id    
     moviments = game.detects_possible_movement(_id) #pega o movimentos possiveis para a chave
     plays_of_disk = game.plays_of_disk[_id] #numero de jogadas dos discos 
-    
-    if plays_of_disk%2 == 0:
-        if _id%2 == 0 and  "left" in moviments:
-            if(game.set_pos(line_id,col_id,_id,-1) == False): game.set_pos(line_id,col_id,_id,-2)     
-        elif _id%2 != 0 and "rigth" in moviments or col_id == 0:            
-            if(game.set_pos(line_id,col_id,_id,2) == False): game.set_pos(line_id,col_id,_id,1)
-            
-    else:
-        if _id%2 == 0 and  "rigth" in moviments:
-           if(game.set_pos(line_id,col_id,_id,2) == False): game.set_pos(line_id,col_id,_id,1)
-        elif _id%2 != 0 and "left" in moviments:
-            if(game.set_pos(line_id,col_id,_id,-1) == False): game.set_pos(line_id,col_id,_id,-2)
-    print(game.plays_of_disk[_id], game.move)
-
-    game.print_game()
-    
+    next_col = game.choice_side(moviments,col_id,_id) #escolhe o melhor lado
+    game.set_pos(line_id,col_id,_id,next_col) #set a posição do disco q esta se movendo
+    game.print_game()#printa o jogo    
     game.move += 1
     game.plays_of_disk[_id] += 1
