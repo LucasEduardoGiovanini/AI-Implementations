@@ -21,6 +21,9 @@
 #                encontrado que possua movimentos inexplorados, a não
 #                ser que o ultimo estado encontrado seja o estado objetivo.
 
+#Greedy_hanoi  : Verifica a heuristica de todos os movimentos possíveis e escolhe o de
+#                melhor heuristica(menor valor). Repete até chegar no resultado
+
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def was_visited(matrix,state_list):                #confere se o estado ja foi visitado
     for i in range(0, len(state_list)):
@@ -108,7 +111,7 @@ def Depth_Hanoi(start_matrix, goal_matrix):
 
                     movimentos+=1
                     restart_while = True        # deve-se recomecar o while para tentar todos os moves possiveis para o novo estado
-                    print("movimento ",movimentos)
+                    print("movimento ",movimentos , ": disco da estaca ",i+1 , " para a estaca: ", j+1)
                     print(start_matrix[0])
                     print(start_matrix[1])
                     print(start_matrix[2])
@@ -128,7 +131,7 @@ def Depth_Hanoi(start_matrix, goal_matrix):
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def Width_Hanoi(start_matrix, goal_matrix):
+def Breadth_Hanoi(start_matrix, goal_matrix):
     goal_reached = False
     state_list = [[start_matrix[:], True]]     # adiciona a matriz inicial a lista de estados
     movimentos = 0
@@ -145,7 +148,7 @@ def Width_Hanoi(start_matrix, goal_matrix):
 
                     if not was_visited(attempt,state_list):    # se o estado novo gerado ja nao foi visitado
                         movimentos += 1
-                        print("movimento ", movimentos)        # printa o estado na tela
+                        print("movimento ", movimentos, ": disco da estaca ", i + 1, " para a estaca: ", j + 1)   # printa o estado na tela
                         print(attempt[0])
                         print(attempt[1])
                         print(attempt[2])
@@ -155,3 +158,41 @@ def Width_Hanoi(start_matrix, goal_matrix):
         set_false(start_matrix, state_list)      # apos esgotar os movimentos possiveis, define este estado como False
 
         start_matrix = get_first_true(state_list)
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+def Greedy_Hanoi(start_matrix, goal_matrix, heuristic):
+    goal_reached = False
+    state_list = [[start_matrix[:], True]]  # adiciona a matriz inicial a lista de estados
+    movimentos = 0
+
+    while (not goal_reached):
+        possible_moves = []
+        for i in range(0, 3):  # tenta todos os movimentos para este estado
+            if (not goal_reached):
+                for j in range(0, 3):
+
+                    attempt = Move(start_matrix, state_list, i, j)              # descobre qual é o movimento
+                    possible_moves.append([attempt[:],heuristic(attempt)])      #adiciona aos movimentos possíveis, junto com sua heuristica
+
+                    if (attempt == goal_matrix):  # se o movimento chegou ao estado objetivo
+                        start_matrix = attempt    # define como o estado atual
+                        goal_reached = True
+
+        set_false(start_matrix, state_list)       # apos esgotar os movimentos possiveis, define este estado como False
+
+        smallest = 9999
+        for i in range(0,len(possible_moves)):                                                         # pega o melhor movimento(menor heuristica) que
+            if possible_moves[i][1] < smallest and not was_visited(possible_moves[i][0],state_list):   #ainda nao foi visitado
+                smallest = possible_moves[i][1]
+                start_matrix[:] = possible_moves[i][0]
+
+        movimentos += 1
+        print("movimento ", movimentos)             # printa o estado na tela
+        print(start_matrix[0])
+        print(start_matrix[1])
+        print(start_matrix[2])
+        state_list.append([start_matrix[:], True])  # adiciona o estado na lista
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

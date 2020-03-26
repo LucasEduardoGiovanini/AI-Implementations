@@ -2,11 +2,11 @@ import math
 
 # heuristic_1 : return (right_side - left_side).
 #               Se a matriz for par, retorna a diferenca entre a soma dos pilares da
-#               primeira metade e a soma dos pilares da segunda metade.
+#               segunda metade e a soma dos pilares da primeira metade.
 
 #               Se a matriz for ímpar, encontra o pilar do meio, e o ignora, para
-#               encontrar a diferença entre a soma dos pilares da direita e a
-#               soma dos pilares da esquerda.
+#               encontrar a diferença entre a soma dos pilares da esquerda e a
+#               soma dos pilares da direita.
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,11 +34,4 @@ def heuristic_1(hanoi_matrix):
         left_side = sumColumns(hanoi_matrix, 0, middle)                                # sums left columns
         right_side = sumColumns(hanoi_matrix, middle+1, len(hanoi_matrix[0]) - 1)      # sums right columns
 
-    return(right_side-left_side)  # returns difference of right and left
-
-#               0  1  2
-hanoi_tower = [[0, 0, 0],
-               [2, 0, 0],
-               [3, 0, 1]]
-
-print(heuristic_1(hanoi_tower))
+    return(left_side-right_side)  # returns difference of right and left
