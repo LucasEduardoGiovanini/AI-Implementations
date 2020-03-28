@@ -16,10 +16,10 @@
 #                pilar da direita para pilar da esquerda;
 #                pilar da direita para pilar do meio;
 
-# Breadth_Hanoi: Tenta todos os movimentos possíveis de um estado, e
-#                depois muda o estado atual para o primeiro estado
-#                encontrado que possua movimentos inexplorados, a não
-#                ser que o ultimo estado encontrado seja o estado objetivo.
+# Breadth_Hanoi: Tenta todos os movimentos possíveis de um estado, e marca que este
+#                é o estado "pai" deles, e depois muda o estado atual para o próximo
+#                estadoencontrado, a não ser que o ultimo estado encontrado seja
+#                o estado objetivo. Encontra o caminho voltando pelos pais.
 
 #Greedy_hanoi  : Verifica a heuristica de todos os movimentos possíveis e escolhe o de
 #                melhor heuristica(menor valor). Repete até chegar no resultado
@@ -37,20 +37,42 @@ def set_false(matrix,state_list):                  # define o estado como False 
     for x in range(len(state_list) - 1, -1, -1):
         if state_list[x][0] == matrix:
             state_list[x][1] = False;
+            break
 
 
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def get_last_true(state_list):                     # pega o ultimo estado True na lista de estado
     for x in range(len(state_list) - 1, -1, -1):
         if state_list[x][1] == True:
             return state_list[x][0]
 
 
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----SEM UTILIZACAO--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def get_first_true(state_list):
     for x in range(0, len(state_list)):  # e pega o primeiro estado True na lista de estado
         if state_list[x][1] == True:
             return state_list[x][0]
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+def position_of(matrix,state_list):
+    for i in range(len(state_list)):
+        if state_list[i][0] == matrix:
+            return i
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+def print_result(state_list):                      # para printar em uma formatação mais facil de ser entendida
+    print("Solução encontrada:")
+    for i in range(3):                             # para printar o topo, depois o meio e a base dos estados
+        for state in state_list:
+            if state[1]:                           # se o estado estiver marcado como verdadeiro
+                print(state[0][i], end = " ")      # printa a parte correspondente
+                if(i == 1):
+                    print("-->", end = " ")        # se for o meio,a diciona uma seta("-->")
+                else:
+                    print("   ", end = " ")
+        print()                                    #nova linha
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -127,14 +149,19 @@ def Depth_Hanoi(start_matrix, goal_matrix):
         if(not restart_while):     # se todos os movimentos foram tentados e nao se achou nenhum possivel
 
             set_false(start_matrix, state_list)
-            start_matrix = get_last_true(state_list)
+            start_matrix[:] = get_last_true(state_list)
+
+
+    print_result(state_list)
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def Breadth_Hanoi(start_matrix, goal_matrix):
     goal_reached = False
-    state_list = [[start_matrix[:], True]]     # adiciona a matriz inicial a lista de estados
+    state_list = [[start_matrix[:], True,-1]]     # adiciona a matriz inicial a lista de estados
     movimentos = 0
+    next = 0                                      #para passar para o proximo estado
+
 
     while (not goal_reached):
         for i in range(0, 3):                  # tenta todos os movimentos para este estado
@@ -142,9 +169,7 @@ def Breadth_Hanoi(start_matrix, goal_matrix):
                 for j in range(0, 3):
                     attempt = Move(start_matrix, state_list, i, j)
 
-                    if(attempt == goal_matrix):      # se o movimento chegou ao estado objetivo
-                        start_matrix = attempt       # define como o estado atual
-                        goal_reached = True
+
 
                     if not was_visited(attempt,state_list):    # se o estado novo gerado ja nao foi visitado
                         movimentos += 1
@@ -152,12 +177,25 @@ def Breadth_Hanoi(start_matrix, goal_matrix):
                         print(attempt[0])
                         print(attempt[1])
                         print(attempt[2])
-                        state_list.append([attempt[:], True])  # adiciona o estado na lista
+                        state_list.append([attempt[:], True, position_of(start_matrix,state_list)])  # adiciona o estado na lista, e diz que o estado atual é seu pai
+
+                    if (attempt == goal_matrix):  # se o movimento chegou ao estado objetivo
+                        start_matrix = attempt  # define como o estado atual
+                        next = -1
+                        goal_reached = True
 
 
-        set_false(start_matrix, state_list)      # apos esgotar os movimentos possiveis, define este estado como False
+        next +=1
+        start_matrix[:] = state_list[next][0]    # passa para o proximo estado
 
-        start_matrix = get_first_true(state_list)
+
+    parent = len(state_list)-1
+    path = []
+    while(parent != -1):                  # passa pelo state_list e vai coletando os pais de cada estado, para encontrar o caminho solução
+        path.insert(0,state_list[parent]) # insere no começo da lista
+        parent = state_list[parent][2]
+
+    print_result(path)
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
