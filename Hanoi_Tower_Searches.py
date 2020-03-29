@@ -47,13 +47,6 @@ def get_last_true(state_list):                     # pega o ultimo estado True n
             return state_list[x][0]
 
 
-#----SEM UTILIZACAO--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def get_first_true(state_list):
-    for x in range(0, len(state_list)):  # e pega o primeiro estado True na lista de estado
-        if state_list[x][1] == True:
-            return state_list[x][0]
-
-
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def position_of(matrix,state_list):
     for i in range(len(state_list)):
@@ -64,6 +57,7 @@ def position_of(matrix,state_list):
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def print_result(state_list):                      # para printar em uma formatação mais facil de ser entendida
     print("Solução encontrada:")
+
     for i in range(3):                             # para printar o topo, depois o meio e a base dos estados
         for state in state_list:
             if state[1]:                           # se o estado estiver marcado como verdadeiro
@@ -72,6 +66,7 @@ def print_result(state_list):                      # para printar em uma formata
                     print("-->", end = " ")        # se for o meio,a diciona uma seta("-->")
                 else:
                     print("   ", end = " ")
+
         print()                                    #nova linha
 
 
@@ -203,6 +198,7 @@ def Greedy_Hanoi(start_matrix, goal_matrix, heuristic):
     goal_reached = False
     state_list = [[start_matrix[:], True]]  # adiciona a matriz inicial a lista de estados
     movimentos = 0
+    path = []
 
     while (not goal_reached):
         possible_moves = []
@@ -221,16 +217,22 @@ def Greedy_Hanoi(start_matrix, goal_matrix, heuristic):
 
         smallest = 9999
         for i in range(0,len(possible_moves)):                                                         # pega o melhor movimento(menor heuristica) que
-            if possible_moves[i][1] < smallest and not was_visited(possible_moves[i][0],state_list):   #ainda nao foi visitado
-                smallest = possible_moves[i][1]
-                start_matrix[:] = possible_moves[i][0]
+            if(not was_visited(possible_moves[i][0],state_list)):
+                movimentos += 1
+                print("movimento ", movimentos)  # printa o estado na tela
+                print(possible_moves[i][0][0])
+                print(possible_moves[i][0][1])
+                print(possible_moves[i][0][2])
+                if possible_moves[i][1] < smallest:   #ainda nao foi visitado
+                    smallest = possible_moves[i][1]
+                    start_matrix[:] = possible_moves[i][0]
 
-        movimentos += 1
-        print("movimento ", movimentos)             # printa o estado na tela
-        print(start_matrix[0])
-        print(start_matrix[1])
-        print(start_matrix[2])
+
+
+        path.append([start_matrix[:],True])                   # adiciona este estado na resposta
         state_list.append([start_matrix[:], True])  # adiciona o estado na lista
+
+    print_result(path)
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
