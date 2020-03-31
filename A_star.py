@@ -204,3 +204,4 @@ while game.complet() == False: #roda até que o objetivo tenha sido atigindo
     game.print_game()#printa o jogo    
     game.move += 1
     game.plays_of_disk[_id] += 1
+a = int(input())
